@@ -105,11 +105,16 @@ public class ID3 implements MLAlgorithm {
     }
 
     private String getMostCommonExampleLabel(List<Example> examples) {
-        Map.Entry<String, Long> label = examples.stream().map(Example::label)
+
+        Map.Entry<String, Long> label = examples.stream()
+                .map(Example::label)
                 .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()))
                 .entrySet()
                 .stream()
-                .max(Map.Entry.comparingByValue()).orElse(null);
+                .sorted(Map.Entry.comparingByKey())
+                .min(Map.Entry.<String, Long>comparingByValue()
+                        .thenComparing(Map.Entry.comparingByKey()))
+                .orElse(null);
 
         if (label != null) {
             return label.getKey();
@@ -188,17 +193,6 @@ public class ID3 implements MLAlgorithm {
                 .stream()
                 .map(Feature::feature)
                 .collect(Collectors.toSet());
-    }
-
-    private Node getChildWithValue(List<Node> children, String value) {
-        for (Node child: children) {
-            if (child instanceof Leaf leaf && leaf.getLabel().equals(value)) {
-                return child;
-            } else if (child instanceof FeatureNode node && node.getFeature().value().equals(value)){
-                return child;
-            }
-        }
-        return null;
     }
 
     private Set<String> getAllLabels(List<Example> examples) {

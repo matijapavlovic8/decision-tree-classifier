@@ -7,33 +7,9 @@ import ui.nodes.TreeNode;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class OutputFormatter {
-
-//    public static void printNode(Node node) {
-//        if(node instanceof Leaf leaf) {
-//            System.out.println(leaf.getLabel());
-//        } else if (node instanceof FeatureNode featureNode) {
-//            System.out.print(featureNode.getDepth() + 1 + ":"
-//                    + featureNode.getFeature().feature() + "=" +
-//                    featureNode.getFeature().value() + " ");
-//        }
-//    }
-//
-//    public static void printBranches(Node root) {
-//        if (root instanceof Leaf leaf) {
-//            printNode(leaf);
-//        } else if(root instanceof FeatureNode node) {
-//            for (Node child: node.getChildren()) {
-//                printNode(node);
-//                printBranches(child);
-//            }
-//        } else if(root instanceof TreeNode treeNode) {
-//            for(Node child: treeNode.getChildren()) {
-//                printBranches(child);
-//            }
-//        }
-//    }
 
     public static void printNode(Node node, List<String> path) {
         if (node instanceof Leaf leaf) {
@@ -76,7 +52,7 @@ public class OutputFormatter {
     }
 
     public static void printAccuracy(double accuracy) {
-        System.out.printf("[ACCURACY]: %.5f\n", accuracy);
+        System.out.printf(Locale.US, "[ACCURACY]: %.5f\n", accuracy);
     }
 
     public static void printConfusionMatrix(int[][] matrix) {
