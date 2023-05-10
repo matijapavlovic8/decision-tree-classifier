@@ -10,9 +10,11 @@ import ui.utils.OutputFormatter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -33,7 +35,7 @@ public class ID3 implements MLAlgorithm {
 
     @Override
     public void fit(List<Example> examples) {
-        root = id3(examples, examples, getFeatureSet(examples), getMostCommonExampleLabel(examples), 0);
+        root = id3(examples, examples, getFeatureSet(examples), null, 0);
         OutputFormatter.printBranches(root);
     }
 
@@ -105,21 +107,22 @@ public class ID3 implements MLAlgorithm {
     }
 
     private String getMostCommonExampleLabel(List<Example> examples) {
-
-        Map.Entry<String, Long> label = examples.stream()
-                .map(Example::label)
-                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()))
-                .entrySet()
-                .stream()
-                .sorted(Map.Entry.comparingByKey())
-                .min(Map.Entry.<String, Long>comparingByValue()
-                        .thenComparing(Map.Entry.comparingByKey()))
-                .orElse(null);
-
-        if (label != null) {
-            return label.getKey();
+        Map<String, Integer> labelOccurence = new HashMap<>();
+        for (Example e: examples) {
+            int value = labelOccurence.getOrDefault(e.label(), 0);
+            labelOccurence.put(e.label(), value + 1);
         }
-        return null;
+        String mcl = null;
+        Integer maxOcc = 0;
+        for (Map.Entry<String, Integer> entry: labelOccurence.entrySet()) {
+            if (entry.getValue() > maxOcc) {
+                mcl = entry.getKey();
+                maxOcc = entry.getValue();
+            } else if (entry.getValue().equals(maxOcc) && (mcl != null && entry.getKey().compareTo(mcl) < 0)) {
+                mcl = entry.getKey();
+            }
+        }
+        return mcl;
     }
 
     private String getMostDiscriminativeFeature(List<Example> examples, Set<String> featureLabels) {
@@ -133,6 +136,7 @@ public class ID3 implements MLAlgorithm {
                 mdf = fl;
             }
         }
+        System.out.println();
         return mdf;
     }
 
@@ -164,7 +168,8 @@ public class ID3 implements MLAlgorithm {
             double weight = (double) examplesWithFeature.size() / examples.size();
             totalEntropy += getEntropy(examplesWithFeature) * weight;
         }
-        System.out.println("IG(" + feature +")=" + (entrySetEntropy - totalEntropy));
+
+        System.out.printf(Locale.US, "IG(%s)=%.4f ", feature, (entrySetEntropy - totalEntropy));
         return entrySetEntropy - totalEntropy;
 
     }
