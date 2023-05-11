@@ -83,7 +83,6 @@ public class ID3 implements MLAlgorithm {
     }
 
     private Node id3(List<Example> D, List<Example> Dparent, Set<String> X, String y, int depth) {
-
         if (D.isEmpty()) {
             return new Leaf(depth, getMostCommonExampleLabel(Dparent));
         }
@@ -99,8 +98,9 @@ public class ID3 implements MLAlgorithm {
         for (String value: getAllFeatureValues(D, mdf)) {
             Feature newFeature = new Feature(mdf, value);
             List<Example> newExamples = getExamplesWithFeature(D, newFeature);
-            X.remove(mdf);
-            Node node = id3(newExamples, D, X, mcl, depth + 1);
+            Set<String> newX = new HashSet<>(X);
+            newX.remove(mdf);
+            Node node = id3(newExamples, D, newX, mcl, depth + 1);
             subtrees.add(new FeatureNode(depth, newFeature, List.of(node)));
         }
         return new TreeNode(depth, mdf, subtrees);
